@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "CiteSnap - AI Search Citation Extractor",
+  "version": "1.0.0",
+  "description": "一键提取AI搜索引擎的搜索关键词和引用文章链接，用于GEO分析",
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": [
+    "https://www.doubao.com/*",
+    "https://doubao.com/*",
+    "https://chat.deepseek.com/*",
+    "https://www.perplexity.ai/*",
+    "https://perplexity.ai/*",
+    "https://kimi.moonshot.cn/*",
+    "https://metaso.cn/*",
+    "https://www.metaso.cn/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.doubao.com/*",
+        "https://doubao.com/*",
+        "https://chat.deepseek.com/*",
+        "https://www.perplexity.ai/*",
+        "https://perplexity.ai/*",
+        "https://kimi.moonshot.cn/*",
+        "https://metaso.cn/*",
+        "https://www.metaso.cn/*"
+      ],
+      "js": [
+        "shared/data-model.js",
+        "shared/export.js",
+        "content/observer.js",
+        "content/adapters/base.js",
+        "content/adapters/doubao.js",
+        "content/adapters/deepseek.js",
+        "content/adapters/perplexity.js",
+        "content/adapters/kimi.js",
+        "content/adapters/metaso.js",
+        "content/main.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

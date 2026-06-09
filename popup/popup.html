@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>CiteSnap</h1>
+      <span id="platform-badge" class="badge hidden"></span>
+    </header>
+
+    <section id="status-section">
+      <p id="status-msg">正在检测平台...</p>
+    </section>
+
+    <section id="results-section" class="hidden">
+      <div id="conversations-container"></div>
+    </section>
+
+    <section id="actions-section" class="hidden">
+      <button id="btn-refresh" class="btn btn-secondary" title="重新提取">&#8635; 刷新</button>
+      <div class="export-group">
+        <button id="btn-csv" class="btn btn-primary">CSV</button>
+        <button id="btn-json" class="btn btn-primary">JSON</button>
+        <button id="btn-md" class="btn btn-primary">Markdown</button>
+      </div>
+    </section>
+
+    <section id="empty-state" class="hidden">
+      <p class="empty-msg">此页面没有检测到带联网搜索的对话</p>
+      <p class="empty-hint">仅提取 AI 触发了联网搜索的对话轮次</p>
+    </section>
+
+    <section id="unsupported-section" class="hidden">
+      <p class="unsupported-msg">当前页面不是支持的 AI 搜索引擎</p>
+      <p class="supported-list">支持: 豆包 · DeepSeek · Perplexity · Kimi · 秘塔搜索</p>
+    </section>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
