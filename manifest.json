@@ -17,7 +17,9 @@
     "https://www.qianwen.com/*",
     "https://tongyi.aliyun.com/*",
     "https://yuanbao.tencent.com/*",
-    "https://yb.tencent.com/*"
+    "https://yb.tencent.com/*",
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",
@@ -45,7 +47,9 @@
         "https://www.qianwen.com/*",
         "https://tongyi.aliyun.com/*",
         "https://yuanbao.tencent.com/*",
-        "https://yb.tencent.com/*"
+        "https://yb.tencent.com/*",
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
       ],
       "js": [
         "shared/data-model.js",
@@ -59,6 +63,7 @@
         "content/adapters/metaso.js",
         "content/adapters/qianwen.js",
         "content/adapters/yuanbao.js",
+        "content/adapters/chatgpt.js",
         "content/main.js"
       ],
       "run_at": "document_idle"
