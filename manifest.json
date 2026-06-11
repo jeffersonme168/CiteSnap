@@ -12,7 +12,10 @@
     "https://perplexity.ai/*",
     "https://kimi.moonshot.cn/*",
     "https://metaso.cn/*",
-    "https://www.metaso.cn/*"
+    "https://www.metaso.cn/*",
+    "https://qianwen.com/*",
+    "https://www.qianwen.com/*",
+    "https://tongyi.aliyun.com/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",
@@ -35,7 +38,10 @@
         "https://perplexity.ai/*",
         "https://kimi.moonshot.cn/*",
         "https://metaso.cn/*",
-        "https://www.metaso.cn/*"
+        "https://www.metaso.cn/*",
+        "https://qianwen.com/*",
+        "https://www.qianwen.com/*",
+        "https://tongyi.aliyun.com/*"
       ],
       "js": [
         "shared/data-model.js",
@@ -47,6 +53,7 @@
         "content/adapters/perplexity.js",
         "content/adapters/kimi.js",
         "content/adapters/metaso.js",
+        "content/adapters/qianwen.js",
         "content/main.js"
       ],
       "run_at": "document_idle"

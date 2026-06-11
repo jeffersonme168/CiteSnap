@@ -9,7 +9,8 @@
     window.GEO.DeepSeekAdapter,
     window.GEO.PerplexityAdapter,
     window.GEO.KimiAdapter,
-    window.GEO.MetasoAdapter
+    window.GEO.MetasoAdapter,
+    window.GEO.QianwenAdapter
   ];
 
   // 匹配当前平台
@@ -69,6 +70,9 @@
       // 先触发展开（如果适配器支持）
       if (adapter._expandThinkingBoxes) {
         adapter._expandThinkingBoxes();
+      }
+      if (adapter._expandReferencePanels) {
+        adapter._expandReferencePanels();
       }
       // 延迟 800ms 等待展开动画和 DOM 更新完成后再提取
       setTimeout(function() {
