@@ -51,13 +51,11 @@ window.GEO.QianwenAdapter.prototype.extract = function() {
     var reqId = this._getReqIdFromRound(round);
     var citations = citationsByReqId[reqId] || [];
 
-    if (citations.length > 0) {
-      var conv = window.GEO.createConversation(query);
-      conv.citations = citations;
-      conv.searchKeywords = [];
-      conv.hasSearch = true;
-      result.conversations.push(conv);
-    }
+    var conv = window.GEO.createConversation(query);
+    conv.citations = citations;
+    conv.searchKeywords = [];
+    conv.hasSearch = citations.length > 0;
+    result.conversations.push(conv);
   }
 
   return result;

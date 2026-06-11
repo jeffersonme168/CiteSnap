@@ -40,9 +40,7 @@ window.GEO.PerplexityAdapter.prototype.extract = function() {
       conv.citations = turn.citations;
       conv.searchKeywords = turn.keywords;
       conv.hasSearch = turn.citations.length > 0;
-      if (conv.hasSearch) {
-        conversations.push(conv);
-      }
+      conversations.push(conv);
     }
   } else {
     // 策略2：单轮提取（fallback）
@@ -51,9 +49,7 @@ window.GEO.PerplexityAdapter.prototype.extract = function() {
     var conv = window.GEO.createConversation(query);
     conv.citations = citations;
     conv.hasSearch = citations.length > 0;
-    if (conv.hasSearch) {
-      conversations.push(conv);
-    }
+    conversations.push(conv);
   }
 
   result.conversations = conversations;

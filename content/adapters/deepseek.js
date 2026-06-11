@@ -45,10 +45,7 @@ window.GEO.DeepSeekAdapter.prototype.extract = function() {
     }
   }
 
-  // 只保留有搜索结果的对话轮次
-  result.conversations = conversations.filter(function(conv) {
-    return conv.hasSearch;
-  });
+  result.conversations = conversations;
 
   return result;
 };
