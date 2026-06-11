@@ -42,6 +42,101 @@ window.GEO.YiyanAdapter.prototype.extract = function() {
 };
 
 /**
+ * 异步提取（逐轮点击引用面板）
+ * 由于 sourceContainer 是全局唯一面板，需要逐个点击每轮的引用按钮，
+ * 等待面板加载后再读取，否则只能读到最后一轮的数据。
+ */
+window.GEO.YiyanAdapter.prototype.extractAsync = function(callback) {
+  var self = this;
+  var result = window.GEO.createResult(this.platformId);
+
+  var questions = document.querySelectorAll('[class*="questionBox"]');
+  var answers = document.querySelectorAll('[class*="answerBox"]');
+
+  var realQuestions = [];
+  for (var i = 0; i < questions.length; i++) {
+    var cls = typeof questions[i].className === 'string' ? questions[i].className : '';
+    if (cls.indexOf('flowBox') !== -1) {
+      realQuestions.push(questions[i]);
+    }
+  }
+
+  // 收集每轮的基本信息和对应的引用按钮
+  var turnData = [];
+  for (var j = 0; j < realQuestions.length; j++) {
+    var queryText = this._extractQueryText(realQuestions[j]);
+    var answerEl = j < answers.length ? answers[j] : null;
+    var refBtn = null;
+    if (answerEl) {
+      // 目标是内层 container（含 titleText 子元素的那个），不是外层 wrapper
+      var containers = answerEl.querySelectorAll('[class*="container__M"]');
+      for (var k = 0; k < containers.length; k++) {
+        var c = containers[k];
+        if (c.querySelector('[class*="titleText"]') && c.textContent.trim().match(/参考\d+个网页/)) {
+          // 确保是最内层的（不包含其他 container__M 子元素）
+          var innerContainers = c.querySelectorAll('[class*="container__M"]');
+          if (innerContainers.length === 0) {
+            refBtn = c;
+            break;
+          }
+        }
+      }
+    }
+    turnData.push({
+      query: queryText,
+      answerEl: answerEl,
+      refBtn: refBtn,
+      citations: []
+    });
+  }
+
+  // 逐轮点击引用按钮并提取
+  var currentIndex = 0;
+
+  function processNext() {
+    if (currentIndex >= turnData.length) {
+      // 所有轮次处理完毕，组装结果
+      for (var m = 0; m < turnData.length; m++) {
+        var conv = window.GEO.createConversation(turnData[m].query);
+        conv.citations = turnData[m].citations;
+        conv.searchKeywords = [];
+        conv.hasSearch = turnData[m].citations.length > 0;
+        result.conversations.push(conv);
+      }
+      callback(result);
+      return;
+    }
+
+    var turn = turnData[currentIndex];
+
+    if (!turn.refBtn) {
+      // 该轮无引用按钮，跳过
+      currentIndex++;
+      processNext();
+      return;
+    }
+
+    // 点击该轮的引用按钮
+    turn.refBtn.click();
+
+    // 等待面板加载
+    setTimeout(function() {
+      var sourceContainer = document.querySelector('[class*="sourceContainer"]');
+      if (sourceContainer) {
+        var items = sourceContainer.querySelectorAll('[class*="item__"]');
+        if (items.length > 0) {
+          turn.citations = self._extractItemsFromPanel(items);
+        }
+      }
+      currentIndex++;
+      processNext();
+    }, 1000);
+  }
+
+  processNext();
+};
+
+/**
  * 获取对话轮次：配对用户提问和 AI 回答
  */
 window.GEO.YiyanAdapter.prototype._getConversationTurns = function() {
@@ -176,18 +271,10 @@ window.GEO.YiyanAdapter.prototype._extractItemsFromPanel = function(items) {
 };
 
 /**
- * 展开参考面板
- * 点击所有"参考N个网页"按钮
+ * 禁用全局展开（由 extractAsync 逐轮处理）
  */
 window.GEO.YiyanAdapter.prototype._expandReferencePanels = function() {
-  var containers = document.querySelectorAll('[class*="container__MWtKSa6G"], [class*="container__M"]');
-  for (var i = 0; i < containers.length; i++) {
-    var el = containers[i];
-    var text = el.textContent.trim();
-    if (text.match(/参考\d+个网页/)) {
-      el.click();
-    }
-  }
+  // 不做全局展开，由 extractAsync 逐轮点击引用按钮
 };
 
 window.GEO.YiyanAdapter.prototype.isResponseComplete = function() {

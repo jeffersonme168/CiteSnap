@@ -77,15 +77,27 @@
       if (adapter._expandReferencePanels) {
         adapter._expandReferencePanels();
       }
-      // 延迟 800ms 等待展开动画和 DOM 更新完成后再提取
-      setTimeout(function() {
-        var result = adapter.extract();
-        if (chrome.storage && chrome.storage.session) {
-          chrome.storage.session.set({ lastExtraction: result });
-        }
-        console.log('[CiteSnap] Manual extraction:', result);
-        sendResponse(result);
-      }, 800);
+
+      // 如果适配器支持异步提取（如 Yiyan 需要逐轮展开面板）
+      if (adapter.extractAsync) {
+        adapter.extractAsync(function(result) {
+          if (chrome.storage && chrome.storage.session) {
+            chrome.storage.session.set({ lastExtraction: result });
+          }
+          console.log('[CiteSnap] Async extraction:', result);
+          sendResponse(result);
+        });
+      } else {
+        // 延迟 800ms 等待展开动画和 DOM 更新完成后再提取
+        setTimeout(function() {
+          var result = adapter.extract();
+          if (chrome.storage && chrome.storage.session) {
+            chrome.storage.session.set({ lastExtraction: result });
+          }
+          console.log('[CiteSnap] Manual extraction:', result);
+          sendResponse(result);
+        }, 800);
+      }
     }
     if (msg.action === 'getStatus') {
       sendResponse({
