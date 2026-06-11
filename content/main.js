@@ -12,7 +12,8 @@
     window.GEO.MetasoAdapter,
     window.GEO.QianwenAdapter,
     window.GEO.YuanbaoAdapter,
-    window.GEO.ChatGPTAdapter
+    window.GEO.ChatGPTAdapter,
+    window.GEO.YiyanAdapter
   ];
 
   // 匹配当前平台

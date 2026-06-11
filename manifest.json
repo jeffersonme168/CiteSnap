@@ -19,7 +19,8 @@
     "https://yuanbao.tencent.com/*",
     "https://yb.tencent.com/*",
     "https://chatgpt.com/*",
-    "https://chat.openai.com/*"
+    "https://chat.openai.com/*",
+    "https://yiyan.baidu.com/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",
@@ -49,7 +50,8 @@
         "https://yuanbao.tencent.com/*",
         "https://yb.tencent.com/*",
         "https://chatgpt.com/*",
-        "https://chat.openai.com/*"
+        "https://chat.openai.com/*",
+        "https://yiyan.baidu.com/*"
       ],
       "js": [
         "shared/data-model.js",
@@ -64,6 +66,7 @@
         "content/adapters/qianwen.js",
         "content/adapters/yuanbao.js",
         "content/adapters/chatgpt.js",
+        "content/adapters/yiyan.js",
         "content/main.js"
       ],
       "run_at": "document_idle"
