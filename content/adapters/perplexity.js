@@ -62,9 +62,10 @@ window.GEO.PerplexityAdapter.prototype.extract = function() {
 
 /**
  * 查找多轮对话结构
- * Perplexity 的多轮对话页面中，每一轮包含：
- * - 一个 query 文本（h1 或其他 heading/text block）
- * - 一个 .prose 回答区域（内含 citation spans）
+ * Perplexity 页面结构：
+ * - 多轮对话的 turn 容器是 flex flex-col 父元素的直接子 div
+ * - 每个 turn 容器内有一个 .prose（回答）和 query 文本
+ * - 第一轮 query 在 h1 中，后续轮次 query 在 div.bg-base 中
  */
 window.GEO.PerplexityAdapter.prototype._findConversationTurns = function() {
   var turns = [];
@@ -72,11 +73,13 @@ window.GEO.PerplexityAdapter.prototype._findConversationTurns = function() {
 
   if (proses.length === 0) return turns;
 
-  // 对于每个 .prose 区域，往上找对应的 query
-  for (var i = 0; i < proses.length; i++) {
-    var proseEl = proses[i];
-    var query = this._findQueryForProse(proseEl, i);
-    var citations = this._extractCitationsFromContainer(proseEl);
+  // 找到所有 turn 容器（每个 .prose 所属的 turn 块）
+  var turnContainers = this._findTurnContainers(proses);
+
+  for (var i = 0; i < turnContainers.length; i++) {
+    var turnEl = turnContainers[i];
+    var query = this._findQueryInTurn(turnEl, i);
+    var citations = this._extractCitationsFromContainer(turnEl);
 
     turns.push({
       query: query,
@@ -89,58 +92,117 @@ window.GEO.PerplexityAdapter.prototype._findConversationTurns = function() {
 };
 
 /**
- * 为指定的 .prose 区域找到对应的用户提问
+ * 找到每个 .prose 所属的 turn 容器
+ * turn 容器是两个 .prose 的公共祖先的直接子元素
  */
-window.GEO.PerplexityAdapter.prototype._findQueryForProse = function(proseEl, index) {
-  // 首轮：页面上的 h1
-  if (index === 0) {
-    var h1 = document.querySelector('h1');
-    if (h1) return h1.textContent.trim();
+window.GEO.PerplexityAdapter.prototype._findTurnContainers = function(proses) {
+  if (proses.length === 1) {
+    // 单轮：返回整个文档 body 作为容器
+    return [document.body];
   }
 
-  // 多轮：向上或向前遍历兄弟节点找 query 文本
-  var container = proseEl.parentElement;
-  while (container && container !== document.body) {
-    // 查找同级的前序兄弟中的 query 文本
-    var prev = container.previousElementSibling;
-    while (prev) {
-      // 检查是否包含用户提问文本（通常在 heading 或特定容器中）
-      var heading = prev.querySelector('h1, h2, [class*="query"]');
-      if (heading) {
-        var text = heading.textContent.trim();
-        if (text.length > 1 && text.length < 500) return text;
-      }
-      // 也可能直接是文本块
-      var directText = prev.textContent.trim();
-      if (directText.length > 1 && directText.length < 300 && !prev.querySelector('.prose')) {
-        return directText;
-      }
-      prev = prev.previousElementSibling;
+  // 找到所有 .prose 的公共祖先
+  var commonAncestor = this._findCommonAncestor(proses[0], proses[1]);
+  if (!commonAncestor) return [document.body];
+
+  // 公共祖先的子元素中，每个包含 .prose 的就是一个 turn 容器
+  var containers = [];
+  var children = commonAncestor.children;
+  for (var i = 0; i < children.length; i++) {
+    if (children[i].querySelector('.prose')) {
+      containers.push(children[i]);
     }
-    container = container.parentElement;
+  }
+
+  // 如果没找到合理的容器，fallback 到每个 prose 本身
+  if (containers.length === 0) {
+    for (var i = 0; i < proses.length; i++) {
+      containers.push(proses[i]);
+    }
+  }
+
+  return containers;
+};
+
+/**
+ * 找到两个元素的最近公共祖先
+ */
+window.GEO.PerplexityAdapter.prototype._findCommonAncestor = function(el1, el2) {
+  var ancestors = [];
+  var node = el1;
+  while (node) {
+    ancestors.push(node);
+    node = node.parentElement;
+  }
+  node = el2;
+  while (node) {
+    if (ancestors.indexOf(node) !== -1) return node;
+    node = node.parentElement;
+  }
+  return null;
+};
+
+/**
+ * 在 turn 容器中找到用户提问文本
+ */
+window.GEO.PerplexityAdapter.prototype._findQueryInTurn = function(turnEl, index) {
+  // 策略1：找 h1（第一轮通常有 h1）
+  var h1 = turnEl.querySelector('h1');
+  if (h1) return h1.textContent.trim();
+
+  // 策略2：找 div.bg-base（后续轮次的 query 容器）
+  var bgBase = turnEl.querySelector('[class*="bg-base"]');
+  if (bgBase) {
+    var text = bgBase.textContent.trim();
+    if (text.length > 1 && text.length < 500) return text;
+  }
+
+  // 策略3：找 [class*="query"] 元素
+  var queryEl = turnEl.querySelector('[class*="query"]');
+  if (queryEl) {
+    var text = queryEl.textContent.trim();
+    if (text.length > 1 && text.length < 500) return text;
+  }
+
+  // 策略4：找 .prose 之前的文本块
+  var prose = turnEl.querySelector('.prose');
+  if (prose) {
+    var current = prose.parentElement;
+    while (current && current !== turnEl) {
+      var prev = current.previousElementSibling;
+      while (prev) {
+        if (!prev.querySelector('.prose')) {
+          var prevText = prev.textContent.trim();
+          if (prevText.length > 1 && prevText.length < 300) {
+            return prevText;
+          }
+        }
+        prev = prev.previousElementSibling;
+      }
+      current = current.parentElement;
+    }
+  }
+
+  // 策略5：首轮 fallback 到页面 h1
+  if (index === 0) {
+    var pageH1 = document.querySelector('h1');
+    if (pageH1) return pageH1.textContent.trim();
   }
 
   return '';
 };
 
 /**
- * 从指定容器（或其祖先范围）提取引用链接
+ * 从指定 turn 容器中提取引用链接
  * Perplexity 使用 data-pplx-citation-url 属性
  */
 window.GEO.PerplexityAdapter.prototype._extractCitationsFromContainer = function(container) {
   var citations = [];
 
-  // 在 prose 区域及其父容器中查找引用
-  var searchScope = container;
-  // 扩大搜索范围到父容器（引用可能在 prose 同级区域）
-  var parent = container.parentElement;
-  if (parent) {
-    searchScope = parent;
-  }
+  // 直接在 turn 容器中查找所有引用
+  var citeEls = container.querySelectorAll('[data-pplx-citation-url]');
 
-  var citeEls = searchScope.querySelectorAll('[data-pplx-citation-url]');
-
-  // 如果在父容器中没找到，在整个文档中找（单轮页面）
+  // 如果容器是 document.body（单轮 fallback），直接搜索整个文档
   if (citeEls.length === 0) {
     citeEls = document.querySelectorAll('[data-pplx-citation-url]');
   }
