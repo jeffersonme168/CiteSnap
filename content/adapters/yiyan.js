@@ -90,6 +90,9 @@ window.GEO.YiyanAdapter.prototype.extractAsync = function(callback) {
     });
   }
 
+  // 文心一言 DOM 是逆序的（最新对话在最上面），需要反转为时间顺序
+  turnData.reverse();
+
   // 逐轮点击引用按钮并提取
   var currentIndex = 0;
 
@@ -166,6 +169,9 @@ window.GEO.YiyanAdapter.prototype._getConversationTurns = function() {
       citations: citations
     });
   }
+
+  // 文心一言 DOM 是逆序的（最新对话在最上面），反转为时间顺序
+  turns.reverse();
 
   return turns;
 };
