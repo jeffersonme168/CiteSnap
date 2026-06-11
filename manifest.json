@@ -15,7 +15,9 @@
     "https://www.metaso.cn/*",
     "https://qianwen.com/*",
     "https://www.qianwen.com/*",
-    "https://tongyi.aliyun.com/*"
+    "https://tongyi.aliyun.com/*",
+    "https://yuanbao.tencent.com/*",
+    "https://yb.tencent.com/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",
@@ -41,7 +43,9 @@
         "https://www.metaso.cn/*",
         "https://qianwen.com/*",
         "https://www.qianwen.com/*",
-        "https://tongyi.aliyun.com/*"
+        "https://tongyi.aliyun.com/*",
+        "https://yuanbao.tencent.com/*",
+        "https://yb.tencent.com/*"
       ],
       "js": [
         "shared/data-model.js",
@@ -54,6 +58,7 @@
         "content/adapters/kimi.js",
         "content/adapters/metaso.js",
         "content/adapters/qianwen.js",
+        "content/adapters/yuanbao.js",
         "content/main.js"
       ],
       "run_at": "document_idle"

@@ -10,7 +10,8 @@
     window.GEO.PerplexityAdapter,
     window.GEO.KimiAdapter,
     window.GEO.MetasoAdapter,
-    window.GEO.QianwenAdapter
+    window.GEO.QianwenAdapter,
+    window.GEO.YuanbaoAdapter
   ];
 
   // 匹配当前平台
